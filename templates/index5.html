@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <title>Neurify AI</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+    <style>
+      * { overflow-y: hidden; overflow-x: hidden; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <center>
+      <div class="console">
+        <h1>Neurify AI</h1>
+        <!-- The record button and status/response containers -->
+        <button id="recordButton">Start Recording</button>
+        <div id="status">Status: Ready</div>
+        <div><a href="http://127.0.0.1:5500/mood.html" style="text-decoration: none; color: black; margin-top: 12px !important;"><button>Play Game</button></a></div>
+        <div id="response"></div>
+      </div>
+      <!-- The p5 sketch will render its canvas inside this container -->
+      <div id="audio-visualizer"></div>
+    </center>
+    <!-- Hidden transcription element (if needed) -->
+    <p id="transcription" style="display: none;"></p>
+
+    <!-- Include your p5 sketch (do not change sketch.js unless necessary) -->
+    <script src="{{ url_for('static', filename='sketch.js') }}"></script>
+
+    <script>
+      let isRecording = false;
+      let mediaRecorder;
+      let audioChunks = [];
+      
+      // Global variable for p5 sound: your p5 sketch will refer to this.
+      window.mySound = null;
+      
+      // Handle recording controls with the same functions from index5.html
+      document.getElementById('recordButton').addEventListener('click', async () => {
+        if (!isRecording) {
+          await startRecording();
+        } else {
+          stopRecording();
+        }
+      });
+      
+      async function startRecording() {
+        try {
+          isRecording = true;
+          audioChunks = [];
+          updateUIState('recording');
+          
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+          
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+          
+          mediaRecorder.onstop = async () => {
+            updateUIState('processing');
+            await sendAudioToBackend();
+          };
+          
+          mediaRecorder.start();
+          console.log("Recording started");
+        } catch (error) {
+          console.error('Recording error:', error);
+          handleError('Microphone access denied or recording failed');
+          resetUI();
+        }
+      }
+      
+      function stopRecording() {
+        if (mediaRecorder && isRecording) {
+          mediaRecorder.stop();
+          console.log("Recording stopped");
+          resetUI();
+        }
+      }
+      
+      async function sendAudioToBackend() {
+        try {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'recording.webm');
+          
+          const response = await fetch('/process', {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Server error');
+          }
+          
+          const data = await response.json();
+          updateResponseUI(data);
+          // Instead of using new Audio(), we load the audio with p5 so that it integrates with our visualization.
+          playAudioResponse(data.audio);
+        } catch (error) {
+          console.error('Processing error:', error);
+          handleError(error.message);
+        } finally {
+          updateUIState('ready');
+        }
+      }
+      
+      function updateResponseUI(data) {
+        const responseDiv = document.getElementById('response');
+        responseDiv.innerHTML = `
+          <p class="user"><strong>You:</strong> ${data.user_input || 'Audio message'}</p>
+          <p class="time">Processed in ${data.timing || '??'} seconds</p>
+        `;
+        // Optionally update the transcription element if your backend sends chat_response.
+        document.getElementById("transcription").textContent = "Neurify: " + (data.chat_response || '');
+      }
+      
+      // Modified function: uses p5.loadSound to load the audio response so that window.mySound is available for your sketch.js.
+      function playAudioResponse(audioData) {
+        if (!audioData) return;
+        // Convert the base64 audioData to a data URL.
+        const audioUrl = `data:audio/ogg;base64,${audioData}`;
+        loadSound(audioUrl, (sound) => {
+          window.mySound = sound; // assign globally for your visualization
+          sound.play();
+          console.log("Audio loaded and playing via p5.loadSound");
+        }, (err) => {
+          console.error("Error loading sound via p5:", err);
+        });
+      }
+      
+      function updateUIState(state) {
+        const statusElem = document.getElementById('status');
+        const buttonElem = document.getElementById('recordButton');
+        
+        switch(state) {
+          case 'recording':
+            buttonElem.textContent = 'Stop Recording';
+            statusElem.textContent = 'Status: Recording...';
+            break;
+          case 'processing':
+            buttonElem.disabled = true;
+            statusElem.textContent = 'Status: Processing...';
+            break;
+          case 'ready':
+            buttonElem.textContent = 'Start Recording';
+            buttonElem.disabled = false;
+            statusElem.textContent = 'Status: Ready';
+            break;
+        }
+      }
+      
+      function handleError(message) {
+        const responseDiv = document.getElementById('response');
+        responseDiv.innerHTML = `
+          <p style="color: #e74c3c;">Error: ${message}</p>
+        `;
+      }
+      
+      function resetUI() {
+        isRecording = false;
+        updateUIState('ready');
+      }
+    </script>
+  </body>
+</html>
+<!--           <p class="user"><strong>You:</strong> ${data.user_input || 'Audio message'}</p>
+          <p class="bot"><strong>Neurify:</strong> ${data.bot_response || 'No response received'}</p> -->
