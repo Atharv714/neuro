@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'carmen';
+    src: url('./fonts/carmen.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'varelaround';
+    src: url('./fonts/VarelaRound-Regular.ttf') format('truetype');
+}
