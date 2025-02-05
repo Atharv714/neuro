@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern App Redesign</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        color: #fff;
+      }
+
+      .container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        background: linear-gradient(135deg, #3b3f7e, #23274d);
+        width: 20%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .sidebar .logo {
+        font-size: 2em;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .sidebar button {
+        background: #4e4d90;
+        border: none;
+        border-radius: 8px;
+        padding: 15px;
+        font-size: 1em;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.3s ease, background 0.3s ease;
+      }
+
+      .sidebar button:hover {
+        background: #6a6dfb;
+        transform: scale(1.05);
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 0px;
+        overflow-y: auto;
+      }
+
+      #game-container {
+        display: none; /* Hide by default */
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      canvas {
+        display: block;
+        margin: 0 auto;
+        background-color: #3298dc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">Game</div>
+        <button id="leetSnakeBtn">LeetSnake Game</button>
+        <button id="coding_game">
+          <a href="leetcode.html" style="color: white; text-decoration: none"
+            >Coding Game</a
+          >
+        </button>
+        <button>
+          <a href="text.html" style="color: white; text-decoration: none"
+            >AI Tutor</a
+          >
+        </button>
+        <button>Favorites</button>
+        <button>Settings</button>
+        <button>Help</button>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content" id="mainContent">
+        <div class="question-container" style="padding-left: 20px">
+          <h2>Welcome to Learnify</h2>
+          <p>Learn by Gaming</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="game-container">
+      <canvas id="gameCanvas" width="1300" height="960"></canvas>
+    </div>
+
+    <video id="userVideo" autoplay playsinline style="display: none"></video>
+    <canvas id="captureCanvas" style="display: none"></canvas>
+
+    <script src="snake-dsa.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const userVideo = document.getElementById("userVideo");
+        const captureCanvas = document.getElementById("captureCanvas");
+        const canvasContext = captureCanvas.getContext("2d");
+
+        async function startVideo() {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+            });
+            userVideo.srcObject = stream;
+          } catch (error) {
+            console.error("Error accessing the camera:", error);
+          }
+        }
+
+        function captureImage() {
+          captureCanvas.width = userVideo.videoWidth || 640;
+          captureCanvas.height = userVideo.videoHeight || 480;
+          canvasContext.drawImage(userVideo, 0, 0);
+          return captureCanvas.toDataURL("image/png");
+        }
+
+        async function detectMood(imageDataUrl) {
+          try {
+            const response = await fetch("http://127.0.0.1:5000/detect-mood", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image: imageDataUrl }),
+            });
+            const result = await response.json();
+            console.log("Detected Mood:", result.mood);
+            alert(`User's Mood is: ${result.mood}`);
+            return result.mood;
+          } catch (error) {
+            console.error("Error detecting mood:", error);
+            return null;
+          }
+        }
+
+        // Perform mood detection on page load
+        await startVideo();
+        setTimeout(async () => {
+          const imageData = captureImage();
+          await detectMood(imageData);
+
+          // Stop the video stream
+          const stream = userVideo.srcObject;
+          const tracks = stream.getTracks();
+          tracks.forEach((track) => track.stop());
+        }, 2000);
+
+        // LeetSnake game logic
+        const leetSnakeBtn = document.getElementById("leetSnakeBtn");
+        const mainContent = document.getElementById("mainContent");
+        const gameContainer = document.getElementById("game-container");
+
+        leetSnakeBtn.addEventListener("click", () => {
+          mainContent.innerHTML = ""; // Clear the main content
+          gameContainer.style.display = "flex"; // Show the game container
+          mainContent.appendChild(gameContainer); // Inject the game into main content
+        });
+      });
+    </script>
+  </body>
+</html>

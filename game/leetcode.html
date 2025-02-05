@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSA Quiz Adventure</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Varela+Round&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    canvas {
+        border-radius: 12px;
+    }
+    #editor-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      border-radius: 12px;
+      background-color: #262626;
+      color: white;
+      font-size: 16px;
+      font-family: "cascadia code", monospace;
+      padding: 10px;
+      resize: none;
+    }
+    button {
+        font-family: 'varela round';
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 12px;
+      background-color: #00e00d;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 800px;
+    }
+    button:hover {
+      background-color: 00e00d;
+    }
+    #output {
+    margin-top: 12px;
+      width: 100%;
+      border-radius: 12px;
+      height: 100px;
+      background-color: #262626;
+      font-family: "cascadia code", monospace;
+      padding: 10px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="editor-container">
+      <textarea id="codeEditor" placeholder="Write your solution here..."></textarea>
+      <button id="runCode">Run Code    </button>
+      <div id="output" contenteditable="false">Output will appear here...</div>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Adjust canvas resolution for crisp rendering
+    const scale = window.devicePixelRatio;
+    const width = 800, height = 200;
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.scale(scale, scale);
+
+    const questions = [
+      {
+        question: "Find the missing number in the array.",
+        testCase: "[1, 2, 3, 4, 6] -> Missing number is 5",
+        solution: (arr) => {
+          const n = arr.length + 1;
+          const expectedSum = (n * (n + 1)) / 2;
+          const actualSum = arr.reduce((a, b) => a + b, 0);
+          return expectedSum - actualSum;
+        },
+        input: [1, 2, 3, 4, 6],
+        expectedOutput: 5,
+      },
+      {
+        question: "Find the longest increasing subsequence in an array.",
+        testCase: "[10, 22, 9, 33, 21, 50, 41, 60, 80] -> Longest increasing subsequence is 6",
+        solution: (arr) => {
+          const dp = Array(arr.length).fill(1);
+          for (let i = 1; i < arr.length; i++) {
+            for (let j = 0; j < i; j++) {
+              if (arr[i] > arr[j]) {
+                dp[i] = Math.max(dp[i], dp[j] + 1);
+              }
+            }
+          }
+          return Math.max(...dp);
+        },
+        input: [10, 22, 9, 33, 21, 50, 41, 60, 80],
+        expectedOutput: 6,
+      },
+    ];
+
+    let currentQuestion = null;
+
+    const drawQuestion = (questionText, testCase) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      ctx.font = "20px Poppins";
+      ctx.fillText("Question:", 10, 30);
+      ctx.fillText(questionText, 10, 60);
+      ctx.fillText("Test Case:", 10, 100);
+      ctx.fillText(testCase, 10, 130);
+    };
+
+    const startGame = () => {
+      currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+      drawQuestion(currentQuestion.question, currentQuestion.testCase);
+    };
+
+    const runCode = () => {
+      const userCode = document.getElementById("codeEditor").value;
+      const outputArea = document.getElementById("output");
+      outputArea.textContent = "";
+
+      try {
+        const userFunction = new Function("input", `
+          ${userCode}
+          return findMissingNumber(input);
+        `);
+
+        const userOutput = userFunction(currentQuestion.input);
+        const correctOutput = currentQuestion.expectedOutput;
+
+        outputArea.textContent = userOutput === correctOutput
+          ? "Correct! 🎉"
+          : `Incorrect! ❌ Expected: ${correctOutput}, but got: ${userOutput}`;
+      } catch (error) {
+        outputArea.textContent = `Error: ${error.message}`;
+      }
+    };
+
+    document.getElementById("runCode").addEventListener("click", runCode);
+
+    startGame();
+  </script>
+</body>
+</html>

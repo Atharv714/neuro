@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Analysis Visualization</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles1.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+    <div id="emotion-detection">
+        <h2>Detected Mood: {{ temp }}</h2>
+    </div>
+
+    <div class="container">
+        <h1>Emotion-based Health Analysis</h1>
+
+    {% if img_path %}
+        <div id="chart-image">
+            <img src="{{ url_for('static', filename='health_analysis.png') }}" alt="Health Analysis Chart">
+        </div>
+    {% else %}
+        <p>No chart available.</p>
+    {% endif %}
+    
+
+        <div id="charts-container">
+            <div id="bar-chart" class="chart"></div>
+            <div id="pie-chart" class="chart"></div>
+            <div id="line-chart" class="chart"></div>
+            <div id="scatter-chart" class="chart"></div>
+            <div id="histogram-chart" class="chart"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

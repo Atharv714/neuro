@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern App Redesign</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #3b3f7e, #23274d);
+            width: 20%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar .logo {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar button {
+            background: #4e4d90;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1em;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .sidebar button:hover {
+            background: #6a6dfb;
+            transform: scale(1.05);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .question-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .question-container h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .answers input[type="text"] {
+            background: #ffffff33;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1em;
+            color: white;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .answers input[type="text"]:focus {
+            background: #ffffff66;
+        }
+
+        .submit-btn {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .submit-btn button {
+            background: #e04b4a;
+            border: none;
+            border-radius: 15px;
+            padding: 15px 25px;
+            font-size: 1em;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .submit-btn button:hover {
+            background: #ff6b6b;
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">Game</div>
+            <button>LeetSnake Game</button>
+            <button>Dashboard</button>
+            <button>Favorites</button>
+            <button>Settings</button>
+            <button>Help</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="question-container">
+                <h2>Question 1: Fill in the blanks in the following array.</h2>
+                <div class="answers">
+                    <input type="text" placeholder="Enter your answer here...">
+                    <input type="text" placeholder="Enter your answer here...">
+                    <input type="text" placeholder="Enter your answer here...">
+                </div>
+                <div class="submit-btn">
+                    <button>Submit & Next</button>
+                </div>
+            </div>
+
+            <!-- Placeholder for more questions -->
+            <div class="question-container">
+                <h2>Question 2: Placeholder text for future questions.</h2>
+                <div class="answers">
+                    <input type="text" placeholder="Enter your answer here...">
+                </div>
+                <div class="submit-btn">
+                    <button>Submit & Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js"></script>
+</body>
+</html>

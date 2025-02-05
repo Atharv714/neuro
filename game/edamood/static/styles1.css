@@ -1,0 +1,56 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+#emotion-selection {
+    margin-bottom: 40px;
+}
+
+#emotion-selection select {
+    padding: 10px;
+    font-size: 16px;
+}
+
+#emotion-selection button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-left: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#emotion-selection button:hover {
+    background-color: #45a049;
+}
+
+#charts-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.chart {
+    height: 400px;
+}
